@@ -1,0 +1,6 @@
+**/__pycache__/
+**/migrations/
+**/.DS_Store
+/mnist_data/
+db.sqlite3
+lab.py
