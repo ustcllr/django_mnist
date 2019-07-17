@@ -51,3 +51,31 @@ def recognize_single(label, w, b):
     wrong_recognize_rate = round(wrong_recognize/wrong_total, 2)
     return correct_recognize_rate, wrong_recognize_rate
     
+
+def recognize_rank(chatacter_dict):
+    """输入一个模型，输出一个整体的识别率"""
+
+    correct_recognize = 0
+
+    # 对每一个测试集进行识别
+    for i in range(m):
+        # 得到该测试集的向量
+        x = recognize_image_ary[i]
+
+        rank_list = []
+        for j in range(10):
+            w = chatacter_dict[j][0]
+            b = chatacter_dict[j][1]
+            z = np.dot(w, x) + b
+            rank_list.append(z)
+
+        # 获得rank出来的答案
+        recognize_value = rank_list.index(max(rank_list))
+
+        # 对答案
+        if recognize_label_ary[i] == recognize_value:
+            correct_recognize += 1
+
+    # 计算识别率
+    correct_recognize_rate = round(correct_recognize/m, 2)
+    return correct_recognize_rate
