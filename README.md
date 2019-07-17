@@ -1,22 +1,23 @@
-1. 输入如下命令。
-   ```
-   sudo apt-get install mysql-server
-   ```
-   安装期间会弹出界面，输入两次用户密码，就完成安装了。
+- 简介：本项目通过基于成本函数的梯度下降法，训练mnist的特征值w和b。训练方法是对每一个标签都进行监督学习，然后分别使用单边的方法和rank的方法，去识别测试集中的数字。训练次数为1000次，机器学习率为10。
 
-2. mysql -u root -p，同样会要求输入用户密码。
+- 项目分两步，第一步是计算模型，把特征值都存放在sqlite3中，然后可以跑识别函数，输出识别率。单边识别率很低，内容如下：
 
-3. 创建一个用户。这里的%代表可以在外网访问。
-   ```
-   CREATE USER 'username'@'%' IDENTIFIED BY 'password';
-   ```
+  > label = 1, rate_c = 0.97, rate_w = 0.99
+  >
+  > label = 2, rate_c = 0.11, rate_w = 1.0
+  >
+  > label = 3, rate_c = 0.93, rate_w = 0.94
+  >
+  > label = 4, rate_c = 0.93, rate_w = 0.98
+  >
+  > label = 5, rate_c = 0.93, rate_w = 0.92
+  >
+  > label = 6, rate_c = 0.9, rate_w = 0.99
+  >
+  > label = 7, rate_c = 0.88, rate_w = 0.99
+  >
+  > label = 8, rate_c = 0.22, rate_w = 1.0
+  >
+  > label = 9, rate_c = 0.97, rate_w = 0.8
 
-4. 如果刚才创建的是超级用户，那么可以给它所有数据库的所有权限。
-   ```
-   grant all privileges on *.* to username;
-   ```
-
-5. 最重要的一步，vim /etc/mysql/mysql.conf.d/mysqld.cnf，把bind-address = 127.0.0.1注释掉，然后输入如下命令将mysql重启，这样数据库才能够远程访问。
-   ```
-   service mysqld restart
-   ```
+- 这是一个Django项目。数据集需要存放在项目中，可使用自动下载程序。
