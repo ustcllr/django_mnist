@@ -3,7 +3,7 @@
 """
 
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_mnist.settings') 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_mnist.settings')
 
 import django
 django.setup()

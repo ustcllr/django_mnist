@@ -5,27 +5,28 @@
 import numpy as np
 
 # 定义读取训练集的数量
-TRAINING_SUM = 60000
+TRAINING_SUM = 60
 
 # 定义读取测试集的数量
-RECOGNIZE_SUM = 6000
+RECOGNIZE_SUM = 10000
 
 
 def get_training_image_ary():
-    """得到图片二维数组，行代表像素，列代表张数"""
+    """得到图片二维数组，每一列是一个训练集"""
 
     # 创建一个二维数组，共TRAINING_SUM张图片
-    image_ary = np.zeros(shape=(TRAINING_SUM, 784), dtype='int')
+    image_ary = np.zeros(shape=(784, TRAINING_SUM), dtype='int')
 
     with open('mnist_data/train-images.idx3-ubyte', 'rb') as f:
         f_read = f.read()
 
-        for j in range(TRAINING_SUM):
-            # 得到当前图片的开始位置
-            begin_num = 16 + j*784
+        for i in range(TRAINING_SUM):
+            # 得到每个训练集的开始位置
+            begin_num = 16 + i*784
 
-            for i in range(784):
-                image_ary[j][i] = f_read[begin_num + i]
+            for j in range(784):
+                # 数据是纵向进行填充
+                image_ary[j][i] = f_read[begin_num + j]
 
     return image_ary
 

@@ -32,7 +32,7 @@ def get_dataset():
 
 def main():
     # 定义要训练的标签
-    for label in range(10):
+    for label in range(1, 10):
         # 先检查一下这个标签是否训练过了
         qs = Character.objects.filter(label=str(label), dataset__name='mnist')
         if len(qs):
