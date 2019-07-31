@@ -15,6 +15,42 @@ recognize_label_ary = get_recognize_label_ary()
 m = RECOGNIZE_SUM
 
 
+def recognize_rank(chatacter_dict):
+    """输入一个模型，输出一个整体的识别率"""
+
+    correct_recognize = 0
+
+    # 对每一个测试集进行识别
+    for i in range(m):
+        # 得到该测试集的向量
+        x = recognize_image_ary[:,i].reshape(784, 1)
+
+        rank_list = []
+        for j in range(10):
+            w_1, b_1, w_2, b_2 = [x for x in chatacter_dict[j]]
+
+            z_1 = np.dot(w_1, x) + b_1
+            # 第一层激活函数为relu
+            a_1 = np.where(z_1<0, 0, z_1)
+
+            z_2 = np.dot(w_2, a_1) + b_2
+            # 第2层激活函数为sigmoid
+            a_2 = 1 / (1 + np.exp(-z_2))
+
+            rank_list.append(a_2[0][0])
+
+        # 获得rank出来的答案
+        recognize_value = rank_list.index(max(rank_list))
+
+        # 对答案
+        if (recognize_label_ary[0][i] == recognize_value) and max(rank_list) >= 0.5:
+            correct_recognize += 1
+
+    # 计算识别率
+    correct_recognize_rate = round(correct_recognize/m, 2)
+    return correct_recognize_rate
+
+
 def recognize_single(label, w, b):
     """单边识别率的计算，返回正确项和干扰项的识别率"""
 
@@ -50,32 +86,3 @@ def recognize_single(label, w, b):
     correct_recognize_rate = round(correct_recognize/correct_total, 2)
     wrong_recognize_rate = round(wrong_recognize/wrong_total, 2)
     return correct_recognize_rate, wrong_recognize_rate
-    
-
-def recognize_rank(chatacter_dict):
-    """输入一个模型，输出一个整体的识别率"""
-
-    correct_recognize = 0
-
-    # 对每一个测试集进行识别
-    for i in range(m):
-        # 得到该测试集的向量
-        x = recognize_image_ary[i]
-
-        rank_list = []
-        for j in range(10):
-            w = chatacter_dict[j][0]
-            b = chatacter_dict[j][1]
-            z = np.dot(w, x) + b
-            rank_list.append(z)
-
-        # 获得rank出来的答案
-        recognize_value = rank_list.index(max(rank_list))
-
-        # 对答案
-        if recognize_label_ary[i] == recognize_value:
-            correct_recognize += 1
-
-    # 计算识别率
-    correct_recognize_rate = round(correct_recognize/m, 2)
-    return correct_recognize_rate

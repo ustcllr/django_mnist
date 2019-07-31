@@ -40,12 +40,12 @@ def rank():
     qs = Character.objects.filter(dataset__name='mnist')
     for character in qs:
         label = int(character.label)
-        w_s = character.w
-        w_l = json.loads(w_s)
-        w = np.array(w_l)
-        b_s = character.b
-        b = float(b_s)
-        chatacter_dict[label] = [w, b]
+        character_list = json.loads(character.value)
+        w_1 = np.array(json.loads(character_list[0][0]))
+        b_1 = np.array(json.loads(character_list[0][1]))
+        w_2 = np.array(json.loads(character_list[1][0]))
+        b_2 = np.array(json.loads(character_list[1][1]))
+        chatacter_dict[label] = [w_1, b_1, w_2, b_2]
 
     correct_recognize_rate = recognize_rank(chatacter_dict)
     print('correct_recognize_rate =', correct_recognize_rate)
