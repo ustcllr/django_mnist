@@ -2,12 +2,14 @@
 训练神经网络的模型
 """
 
+import os
 import datetime
 import json
 
 import numpy as np
 
-from data_support import get_training_image_ary, get_training_label_ary, TRAINING_SUM
+from data_support import get_training_image_ary, get_training_label_ary, \
+        TRAINING_SUM, DATASET_NAME
 
 
 # 定义训练集的总数
@@ -102,6 +104,7 @@ if __name__ == '__main__':
     b_li = [x.tolist() for x in blist]
     list1 = [w_li, b_li]
     str1 = json.dumps(list1)
-    file = open('data/array.txt', 'w')
+    write_path = os.path.join(DATASET_NAME, 'array.txt')
+    file = open(write_path, 'w')
     file.write(str1)
     file.close()

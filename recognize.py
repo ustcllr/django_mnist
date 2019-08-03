@@ -2,18 +2,22 @@
 根据训练出来的特征值，计算测试集的识别率
 """
 
+import os
 import json
 
 import numpy as np
 
-from data_support import get_recognize_image_ary, get_recognize_label_ary, RECOGNIZE_SUM
+from data_support import get_recognize_image_ary, get_recognize_label_ary, \
+        RECOGNIZE_SUM, DATASET_NAME
 from train_model import L
+
 
 # 再定义集合的总数
 m = RECOGNIZE_SUM
 
 # 从文件中提取模型
-file = open('data/array.txt', 'r')
+read_path = os.path.join(DATASET_NAME, 'array.txt')
+file = open(read_path, 'r')
 str1 = file.read()
 list1 = json.loads(str1)
 w_li = list1[0]
@@ -45,10 +49,9 @@ for i in range(m):
     predict_ary = assist[i]
     max_rate = np.max(predict_ary)
     num_index = int(np.argwhere(predict_ary==max_rate))
-    # print(num_index, max_rate)
     # 如果最大概率达到0.5，rank矩阵对应位置的值设为1
     if max_rate >= 0.5 and label_ary[i] == num_index:
         correct += 1
 
-# correct /= m
-print('correct =', correct)
+correct /= m
+print('correct_rate =', correct)
