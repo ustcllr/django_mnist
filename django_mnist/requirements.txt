@@ -1,9 +1,0 @@
-requests
-numpy
-matplotlib
-# 获得cv2，数组转图片
-opencv-python
-django
-sqlalchemy
-# 用于读取大型数组
-pandas
