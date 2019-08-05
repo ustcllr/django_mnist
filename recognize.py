@@ -8,50 +8,56 @@ import json
 import numpy as np
 
 from data_support import get_recognize_image_ary, get_recognize_label_ary, \
+        forward_prop, get_variance, get_bias, \
         RECOGNIZE_SUM, DATASET_NAME
 from train_model import L
 
 
-# 再定义集合的总数
+# 定义集合的总数
 m = RECOGNIZE_SUM
 
-# 从文件中提取模型
+# 读取文件
 read_path = os.path.join(DATASET_NAME, 'array.txt')
 file = open(read_path, 'r')
-str1 = file.read()
-list1 = json.loads(str1)
-w_li = list1[0]
-b_li = list1[1]
-wlist = [np.array(x) for x in w_li]
-blist = [np.array(x) for x in b_li]
-zlist = [0] * (L+1)
-alist = [0] * (L+1)
-
-# 得到训练集和标签集
-alist[0] = get_recognize_image_ary()
-label_ary = get_recognize_label_ary()
-
+input_dict = json.loads(file.read())
 file.close()
 
-# 前向传播：input layer全部使用relu作为激活函数
-for l in range(1, L+1):
-    zlist[l] = np.dot(wlist[l], alist[l-1]) + blist[l]
-    if l != L:
-        alist[l] = np.where(zlist[l]<0, 0, zlist[l])
-    else:
-        alist[l] = 1 / (1 + np.exp(-zlist[l]))
+# 从文件中提取模型
+w_li = input_dict['w_li']
+b_li = input_dict['b_li']
+v1 = input_dict['variance']
+w = [np.array(x) for x in w_li]
+b = [np.array(x) for x in b_li]
 
-# 数据分析，计算识别率
-correct = 0
-# 将a_L进行转置，容易计算
-assist = alist[L].T
+# 得到训练集和标签集
+x = get_recognize_image_ary()
+y = get_recognize_label_ary()
+
+# 前向传播，得到a_L
+z, a = forward_prop(w, b, x, L)
+
+# 创建辅助矩阵，用于计算识别率
+alt = a[L].T
+yt = y.T
+assist = np.zeros(alt.shape)
 for i in range(m):
-    predict_ary = assist[i]
+    predict_ary = alt[i]
     max_rate = np.max(predict_ary)
     num_index = int(np.argwhere(predict_ary==max_rate))
-    # 如果最大概率达到0.5，rank矩阵对应位置的值设为1
-    if max_rate >= 0.5 and label_ary[i] == num_index:
-        correct += 1
+    # 如果最大概率达到0.5，辅助矩阵对应位置的值设为1
+    if max_rate >= 0.5:
+        assist[i][num_index] = 1
 
-correct /= m
+# 计算识别率
+correct = 0
+for i in range(m):
+    if (assist[i] == yt[i]).all():
+        correct += 1
+correct = correct / m * 100
+
+# 计算方差
+v2 = get_variance(a[L], y, m)
+bias = get_bias(v1, v2)
+
 print('correct_rate =', correct)
+print('bias =', bias)
