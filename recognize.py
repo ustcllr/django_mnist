@@ -7,9 +7,8 @@ import json
 
 import numpy as np
 
-from data_support import get_recognize_image_ary, get_recognize_label_ary, \
-        forward_prop, get_variance, get_bias, \
-        RECOGNIZE_SUM, DATASET_NAME
+from data_support import get_recognize_image_ary, get_recognize_label_ary, RECOGNIZE_SUM, DATASET_NAME
+from utils import forward_prop, get_variance, get_bias
 from train_model import L
 
 
@@ -25,39 +24,29 @@ file.close()
 # 从文件中提取模型
 w_li = input_dict['w_li']
 b_li = input_dict['b_li']
-v1 = input_dict['variance']
 w = [np.array(x) for x in w_li]
 b = [np.array(x) for x in b_li]
+mu = np.array(input_dict['mu'])
+sigma = np.array(input_dict['sigma'])
+bias1 = np.array(input_dict['bias'])
 
-# 得到训练集和标签集
+# 得到输入层和输出层向量
 x = get_recognize_image_ary()
 y = get_recognize_label_ary()
 
+# 将输入向量进行归一化
+x_normal = (x - mu) / sigma
+
 # 前向传播，得到a_L
-z, a = forward_prop(w, b, x, L)
+z, a = forward_prop(w, b, x_normal, L)
 
-# 创建辅助矩阵，用于计算识别率
-alt = a[L].T
-yt = y.T
-assist = np.zeros(alt.shape)
-for i in range(m):
-    predict_ary = alt[i]
-    max_rate = np.max(predict_ary)
-    num_index = int(np.argwhere(predict_ary==max_rate))
-    # 如果最大概率达到0.5，辅助矩阵对应位置的值设为1
-    if max_rate >= 0.5:
-        assist[i][num_index] = 1
-
-# 计算识别率
-correct = 0
-for i in range(m):
-    if (assist[i] == yt[i]).all():
-        correct += 1
-correct = correct / m * 100
+# 计算偏差
+bias2 = get_bias(a[L], y, m)
 
 # 计算方差
-v2 = get_variance(a[L], y, m)
-bias = get_bias(v1, v2)
+variance = get_variance(bias1, bias2)
+variance = round(variance, 6)
 
-print('correct_rate =', correct)
-print('bias =', bias)
+correct_rate = round((1 - bias2) * 100, 2)
+print('correct_rate =', correct_rate)
+print('variance =', variance)
