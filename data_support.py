@@ -3,14 +3,7 @@
 """
 
 import os
-import datetime
 import numpy as np
-
-# 定义读取训练集的数量
-TRAINING_SUM = 60000
-
-# 定义读取测试集的数量
-RECOGNIZE_SUM = 10000
 
 # 定义数据集的名称
 DATASET_NAME = 'mnist'
@@ -23,7 +16,7 @@ def get_training_image_ary():
     file_name = os.path.join(DATASET_NAME, 'train-images.idx3-ubyte')
     loaded = np.fromfile(file=file_name, dtype=np.uint8)
     # 将数组变换为我们需要的a_0
-    a_0 = loaded[16: TRAINING_SUM*784+16].reshape(TRAINING_SUM, 784).T
+    a_0 = loaded[16: ].reshape(60000, 784).T
     return a_0
 
 
@@ -33,12 +26,12 @@ def get_training_label_ary():
     # 通过数据集二进制文件创建一个二维数组，数据类型为无符号8位
     file_name = os.path.join(DATASET_NAME, 'train-labels.idx1-ubyte')
     loaded = np.fromfile(file=file_name, dtype=np.uint8)
-    y_ori = loaded[8: TRAINING_SUM+8]
+    y_ori = loaded[8: ]
     # 先初始化一个10行矩阵
-    y = np.zeros((10, TRAINING_SUM), 'int')
-    # 再进行二分
-    for i in range(10):
-        y[i] = np.where(y_ori==i, 1, 0)
+    y = np.zeros([10, 60000], np.int32)
+    # 再对每一列进行打孔
+    for i in range(60000):
+        y[y_ori[i]][i] = 1
     return y
 
 
@@ -49,7 +42,7 @@ def get_recognize_image_ary():
     file_name = os.path.join(DATASET_NAME, 't10k-images.idx3-ubyte')
     loaded = np.fromfile(file=file_name, dtype=np.uint8)
     # 将数组变换为我们需要的a_0
-    a_0 = loaded[16: RECOGNIZE_SUM*784+16].reshape(RECOGNIZE_SUM, 784).T
+    a_0 = loaded[16: ].reshape(10000, 784).T
     return a_0
 
 
@@ -59,12 +52,12 @@ def get_recognize_label_ary():
     # 通过数据集二进制文件创建一个二维数组，数据类型为无符号8位
     file_name = os.path.join(DATASET_NAME, 't10k-labels.idx1-ubyte')
     loaded = np.fromfile(file=file_name, dtype=np.uint8)
-    y_ori = loaded[8: RECOGNIZE_SUM+8]
+    y_ori = loaded[8: ]
     # 先初始化一个10行矩阵
-    y = np.zeros((10, RECOGNIZE_SUM), 'int')
-    # 再进行二分
-    for i in range(10):
-        y[i] = np.where(y_ori==i, 1, 0)
+    y = np.zeros([10, 10000], np.int32)
+    # 再对每一列进行打孔
+    for i in range(10000):
+        y[y_ori[i]][i] = 1
     return y
 
 

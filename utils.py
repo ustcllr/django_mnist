@@ -5,26 +5,29 @@
 import numpy as np
 
 
-def get_normalize(x, m):
-    """根据输入向量，计算归一化参数mu和sigma"""
+def get_normalize(x):
+    """获得归一化后的向量以及mu和sigma参数"""
 
+    m = x.shape[1]
     mu = np.sum(x, axis=1, keepdims=True) / m
-    # 创建辅助矩阵，将输入向量中心化，便于计算方差归一常数
-    assist = x - mu
+    # 将向量中心化
+    x_norm = x - mu
     # 计算方差归一常数
-    square_sum = np.sum(assist**2, axis=1, keepdims=True)
-    sigma = np.sqrt(square_sum / m)
-    # 如果算出是0，说明方差不用改变，改成1
-    sigma = np.where(sigma==0, 1, sigma)
-    return mu, sigma
+    sigma_square = np.sum(x_norm**2, axis=1, keepdims=True) / m
+    sigma = np.sqrt(sigma_square + 0.001)
+    x_norm = x_norm / sigma
+    return mu, sigma, x_norm
 
 
-def forward_prop(w, b, x, L):
-    """前向传播，输入特征向量和x，输出z和a"""
+def forward_prop(x, w, b):
+    """正向传播，输入x和特征向量，输出z和a"""
 
-    # 列表初始化
-    z = [np.array([0])] * (L+1)
-    a = [np.array([0])] * (L+1)
+    # 获得最高层数
+    L = len(w) - 1
+
+    # 初始化向量
+    z = [np.zeros(1)] * (L+1)
+    a = [np.zeros(1)] * (L+1)
     a[0] = x
 
     # 前向传播：前面L-1层使用RELU，第L层使用Softmax
@@ -39,17 +42,21 @@ def forward_prop(w, b, x, L):
     return z, a
 
 
-def back_prop(w, z, a, y, L, m):
-    """后向传播，输入特征向量w，预测值z和a，输出矩阵y。输出特征向量的增量"""
+def back_prop(y, a, z, w):
+    """反向传播，输入y，预测值和特征向量，输出特征向量的增量"""
 
-    # 初始化中间增量
-    dz = [np.array([0])] * (L+1)
-    dg = [np.array([0])] * (L+1)
-    # 初始化输出增量
-    dw = [np.array([0])] * (L+1)
-    db = [np.array([0])] * (L+1)
+    # 获得当前batch的数据集数
+    m = y.shape[1]
+    # 获得最高层数
+    L = len(w) - 1
 
-    # 后向传播，第L层直接给出，前面使用递归
+    # 初始化向量
+    dg = [np.zeros(1)] * (L+1)
+    dz = [np.zeros(1)] * (L+1)
+    dw = [np.zeros(1)] * (L+1)
+    db = [np.zeros(1)] * (L+1)
+
+    # 反向传播，第L层直接给出，前面使用递归
     for l in range(L, 0, -1):
         if l == L:
             dz[l] = a[l] - y
@@ -62,21 +69,17 @@ def back_prop(w, z, a, y, L, m):
     return dw, db
 
 
-def get_bias(a_L, y, m):
-    """根据预测值和实际值，计算当前数据集的偏差"""
+def get_accuracy(a_L, y):
+    """输入预测值和标签，计算正答率"""
 
-    # 通过循环计算分类正确的数量
-    correct = 0
-    for i in range(m):
-        # 使用Hardmax处理预测值
-        a_L.T[i] = np.where(a_L.T[i]==np.max(a_L.T[i]), 1, 0)
-        # 如果处理过的预测向量与标签向量一致，说明识别正确
-        if (y.T[i] == a_L.T[i]).all():
-            correct += 1
+    # 得到数据集数
+    m = y.shape[1]
 
-    # 计算偏差
-    bias = (m - correct) / m
-    return bias
+    # 对比两个最大值一维数组
+    equal_ary = np.equal(np.argmax(a_L, 0), np.argmax(y, 0))
+    # 得到平均值，会将输入数组自动转换为01
+    accuracy = np.mean(equal_ary)
+    return round(accuracy, 3)
 
 
 def get_variance(b1, b2):
