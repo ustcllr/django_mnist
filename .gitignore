@@ -1,7 +1,6 @@
 **/__pycache__/
 **/migrations/
 **/.DS_Store
-/mnist/
-/fashion/
+/dataset/
 db.sqlite3
 lab.py
